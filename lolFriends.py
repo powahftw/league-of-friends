@@ -9,9 +9,7 @@ p.add_argument("txtpath", help="File Path of the list of Friends")
 args = p.parse_args()
 
 def api_from_file(path):
-    print("THIS HAS TO CHANGE DONT EXPOSE API. ALSO TO ADD OTHER REGION AND CHANGE API BASE URL BASED ON THAT\n"
-          "ADD CHECK TO SEE IF API REQUEST WAS EXCEEDED MAKING THE CHECK TIMER BASED ON CURRENT USER "
-          "ADD SOME TRY TO PREVENT PROBLEM SUCH AS NO CONNECTION")
+    print("GETTING API KEY FROM API.TXT")
     with open(path, 'r') as f:
         return f.readline()
 
