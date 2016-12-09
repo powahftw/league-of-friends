@@ -2,14 +2,12 @@ import argparse
 import requests
 import time
 import winsound
-import os.path
 
 p = argparse.ArgumentParser(description="Notify when Friends finish to play a game")
 p.add_argument("txtpath", help="File Path of the list of Friends")
 args = p.parse_args()
 
-def api_from_file(path):
-    print("GETTING API KEY FROM API.TXT")
+def api_from_file(path): #GET API KEY FROM TXT FILE
     with open(path, 'r') as f:
         return f.readline()
 
@@ -34,37 +32,49 @@ class player:
         return self.id
 
 
-def upd_id(player):
+def upd_id(player): #UPDATE PLAYER ID
     nick = player.nick
     region = player.region
     nick_id_url = "{0}/api/lol/{1}/v1.4/summoner/by-name/{2}?api_key={3}"\
                    .format(API_BASE_URL.format(region), region, nick, APIKEY)
-    r = requests.get(nick_id_url)
-    if r.status_code == 200:
+    try:
+        r = requests.get(nick_id_url)
+    except requests.exceptions.RequestException as e:
+        print (e)
+        quit()
+
+    status = r.status_code
+    if status == 200:
         return r.json()[player.nick]['id']
-    elif r.status_code == 404:
+    elif status == 404:
         print("SUMMONER %s DON'T EXIST" %player.nick)
         quit()
-    elif r.status_code == 429:
+    elif status == 429:
         print("Rate Limit Exceeded")
         time.sleep(10)
         upd_id(player)
     else:
-        print("UNKNOW ERROR WITH SUMMONER %s" %player.nick)
+        print("UNHANDLED response %d from SUMMONER: %s" %(status,player.nick))
         quit()
 
 
-def player_game(player):
+def player_game(player): #GET INFORMATION ABOUT PLAYER GAME
     id = player.get_id()
     plat = platformdict[player.region]
     game_url = "{0}/observer-mode/rest/consumer/getSpectatorGameInfo/{1}/{2}?api_key={3}"\
                 .format(API_BASE_URL.format(player.region), plat, id, APIKEY)
-    r = requests.get(game_url)
-    if r.status_code == 200:
+    try:
+        r = requests.get(game_url)
+    except requests.exceptions.RequestException as e:
+        print (e)
+        quit()
+
+    status = r.status_code
+    if status == 200:
         return 1
-    elif r.status_code == 404:
+    elif status == 404:
         return 0
-    elif r.status_code == 429:
+    elif status == 429:
         print("Rate Limit Exceeded")
         time.sleep(10)
         player_game(player)
@@ -72,7 +82,7 @@ def player_game(player):
         print("Unspecified API response code")
         quit()
 
-def player_from_f(path):
+def player_from_f(path): #GET PLAYER FROM FILE
     try:
         d = {}
         with open(path) as f:
@@ -85,7 +95,7 @@ def player_from_f(path):
         print("There is  problem with the file you provided")
         quit()
 
-def print_lista(list):
+def print_lista(list): #PRINT LIST OF PLAYER
     for e in list:
         print("NICK:\t%s\nREGION\t%s\n" %(e.nick, e.region))
 
@@ -106,9 +116,6 @@ def check_all(list):
             else:
                 print ("-%s is not playing" %e.nick.upper())
     print("---")
-
-def print_data(player):
-    print("\nAPI:\t%s\nNICK:\t%s\nREGION:\t%s\nID:\t\t%s\n" %(APIKEY[0:9] + "...", player.nick, player.region, player.id))
 
 if __name__ == '__main__':
     lista = player_from_f(args.txtpath)
