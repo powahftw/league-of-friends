@@ -14,7 +14,7 @@ def api_from_file(path): #GET API KEY FROM TXT FILE
 def nick_format(nick):
     return nick.lower().replace(" ","")
 
-platformdict = {'euw': 'EUW1', 'na': 'NA1', 'eune': 'EUN1', 'br': 'BR1', 'jp': 'JP1', 'kr': 'KR', 'oce': 'OC1', 'ru': 'RU', 'tr': 'TR'}
+platformdict = {'euw': 'EUW1', 'na': 'NA1', 'eune': 'EUN1', 'br': 'BR1', 'kr': 'KR', 'oce': 'OC1', 'ru': 'RU', 'tr': 'TR', 'jp': 'JP1', 'lan': 'LA1', 'las': 'LA2', 'pbe': 'PBE1'}
 
 API_BASE_URL = "https://{}.api.pvp.net"
 APIKEY = api_from_file("api.txt")
@@ -87,8 +87,8 @@ def player_from_f(path): #GET PLAYER FROM FILE
         d = {}
         with open(path) as f:
             for line in f:
-                a, b = str(line).split() #CARE NOT TO PROVIDE NICKNAME WITH SPACES
-                d[a] = b
+                nick = line.rsplit(' ', 1)[0]
+                d[nick] = line.rsplit(' ', 1)[1].rstrip()
         players = [player(key, d[key]) for key in d]
         return players
     except IOError:
