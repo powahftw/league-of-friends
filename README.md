@@ -11,9 +11,6 @@ The script makes uses of requests for the API calls.
 Prepare the friendsnick.txt with a list of firends you'd like to track. Please remember that since you have limited API calls rate you should limit yourself with few friends at time.
 
 
-Please avoid blank spaces in nickname. Few regions are missing, feel free to add those :)
-Check Final Notes on the why 
-
 ```
 nickname server
 nickname server
@@ -41,7 +38,9 @@ python lolfriends.py friendsnick.txt
 
 I hacked togheter this script as a way to utilize [Riot Api](https://developer.riotgames.com) and to quickly remind me when my friends finished a game.
 
-I decided to share this little project in case anyone found it useful but this is the technical equivalent of chewing gum and duct tape.
-There is almost zero error handling and some region are not supported, use it with care. 
-I'll try to fix most of the things in future iteration of this utility.
+I decided to share this little project in case anyone found it useful to know when their friends finish a game, so you can bug them to play with you!
+There might be some missing error handling, use it with care.
+I'll try to fix most of the things in future iteration of this utility such as a better API request limiter.
+
+
 
