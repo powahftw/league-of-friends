@@ -7,17 +7,22 @@ p = argparse.ArgumentParser(description="Notify when Friends finish to play a ga
 p.add_argument("txtpath", help="File Path of the list of Friends")
 args = p.parse_args()
 
-def api_from_file(path): #GET API KEY FROM TXT FILE
+
+def api_from_file(path):  # GET API KEY FROM TXT FILE
     with open(path, 'r') as f:
         return f.readline()
 
-def nick_format(nick):
-    return nick.lower().replace(" ","")
 
-platformdict = {'euw': 'EUW1', 'na': 'NA1', 'eune': 'EUN1', 'br': 'BR1', 'kr': 'KR', 'oce': 'OC1', 'ru': 'RU', 'tr': 'TR', 'jp': 'JP1', 'lan': 'LA1', 'las': 'LA2', 'pbe': 'PBE1'}
+def nick_format(nick):
+    return nick.lower().replace(" ", "")
+
+
+platformdict = {'euw': 'EUW1', 'na': 'NA1', 'eune': 'EUN1', 'br': 'BR1', 'kr': 'KR', 'oce': 'OC1', 'ru': 'RU',
+                'tr': 'TR', 'jp': 'JP1', 'lan': 'LA1', 'las': 'LA2', 'pbe': 'PBE1'}
 
 API_BASE_URL = "https://{}.api.pvp.net"
 APIKEY = api_from_file("api.txt")
+
 
 class player:
     def __init__(self, nick, region):
@@ -32,41 +37,41 @@ class player:
         return self.id
 
 
-def upd_id(player): #UPDATE PLAYER ID
+def upd_id(player):  # UPDATE PLAYER ID
     nick = player.nick
     region = player.region
-    nick_id_url = "{0}/api/lol/{1}/v1.4/summoner/by-name/{2}?api_key={3}"\
-                   .format(API_BASE_URL.format(region), region, nick, APIKEY)
+    nick_id_url = "{0}/api/lol/{1}/v1.4/summoner/by-name/{2}?api_key={3}" \
+        .format(API_BASE_URL.format(region), region, nick, APIKEY)
     try:
         r = requests.get(nick_id_url)
     except requests.exceptions.RequestException as e:
-        print (e)
+        print(e)
         quit()
 
     status = r.status_code
     if status == 200:
         return r.json()[player.nick]['id']
     elif status == 404:
-        print("SUMMONER %s DON'T EXIST" %player.nick)
+        print("SUMMONER %s DON'T EXIST" % player.nick)
         quit()
     elif status == 429:
         print("Rate Limit Exceeded")
         time.sleep(10)
         upd_id(player)
     else:
-        print("UNHANDLED response %d from SUMMONER: %s" %(status,player.nick))
+        print("UNHANDLED response %d from SUMMONER: %s" % (status, player.nick))
         quit()
 
 
-def player_game(player): #GET INFORMATION ABOUT PLAYER GAME
+def player_game(player):  # GET INFORMATION ABOUT PLAYER GAME
     id = player.get_id()
     plat = platformdict[player.region]
-    game_url = "{0}/observer-mode/rest/consumer/getSpectatorGameInfo/{1}/{2}?api_key={3}"\
-                .format(API_BASE_URL.format(player.region), plat, id, APIKEY)
+    game_url = "{0}/observer-mode/rest/consumer/getSpectatorGameInfo/{1}/{2}?api_key={3}" \
+        .format(API_BASE_URL.format(player.region), plat, id, APIKEY)
     try:
         r = requests.get(game_url)
     except requests.exceptions.RequestException as e:
-        print (e)
+        print(e)
         quit()
 
     status = r.status_code
@@ -82,7 +87,8 @@ def player_game(player): #GET INFORMATION ABOUT PLAYER GAME
         print("Unspecified API response code")
         quit()
 
-def player_from_f(path): #GET PLAYER FROM FILE
+
+def player_from_f(path):  # GET PLAYER FROM FILE
     try:
         d = {}
         with open(path) as f:
@@ -95,27 +101,31 @@ def player_from_f(path): #GET PLAYER FROM FILE
         print("There is  problem with the file you provided")
         quit()
 
-def print_lista(list): #PRINT LIST OF PLAYER
+
+def print_lista(list):  # PRINT LIST OF PLAYER
     for e in list:
-        print("NICK:\t%s\nREGION\t%s\n" %(e.nick, e.region))
+        print("NICK:\t%s\nREGION:\t%s\n" % (e.nick, e.region))
+
 
 def alert(player):
     print("%s has finished a GAME" % player.nick.upper())
     winsound.Beep(2000, 1000)
 
+
 def check_all(list):
-    print ("\n\n~~~~~~\n\n")
+    print("\n\n~~~~~~\n\n")
     for e in list:
-         print("---")
-         if player_game(e):
+        print("---")
+        if player_game(e):
             e.ingame = True
-            print ("-%s is currently in game" %e.nick.upper())
-         else:
+            print("-%s is currently in game" % e.nick.upper())
+        else:
             if e.ingame:
                 alert(e)
             else:
-                print ("-%s is not playing" %e.nick.upper())
+                print("-%s is not playing" % e.nick.upper())
     print("---")
+
 
 if __name__ == '__main__':
     lista = player_from_f(args.txtpath)
